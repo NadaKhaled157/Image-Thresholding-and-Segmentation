@@ -9,40 +9,20 @@ import numpy as np
 
 
 def compute_histogram(image):
-    """
-    Compute the histogram of a grayscale image.
-    Args:
-        image (numpy.ndarray): Input grayscale image (2D array, dtype=uint8).
-    Returns:
-        numpy.ndarray: 1D histogram of 256 bins.
-    """
-    # Initialize histogram (256 bins for 0-255)
     histogram = np.zeros(256, dtype=int)
-
-    # Get image dimensions
     height, width = image.shape
-
-    # Iterate through each pixel and count intensities
     for y in range(height):
         for x in range(width):
             intensity = image[y, x]
             histogram[intensity] += 1
-
     return histogram
 
 
 def cv2_to_pixmap(cv_img):
-    # Convert BGR (OpenCV) to RGB (Qt)
     rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-
-    # Get image dimensions and format
     height, width, channels = rgb_image.shape
     bytes_per_line = 3 * width  # 3 channels (RGB)
-
-    # Create QImage from OpenCV data
     qimg = QImage(rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
-
-    # Convert QImage to QPixmap
     return QPixmap.fromImage(qimg)
 
 
@@ -62,7 +42,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setup_connections()
 
     def setup_connections(self):
-        self.RadioButton_Harris_2.clicked.connect(self.activate_thresholding_mode)
+        # THRESHOLDING #
+        self.RadioButton_thres.clicked.connect(self.activate_thresholding_mode)
         self.radioButton_optimal.clicked.connect(self.optimal_threshold)
         self.radioButton_spectral.clicked.connect(self.spectral_threshold)
         self.radioButton_otsu.clicked.connect(self.otsu_threshold)
@@ -72,6 +53,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.radioButton_spectral.setEnabled(False)
         self.radioButton_otsu.setEnabled(False)
 
+        # SEGMENTATION #
+        self.RadioButton_seg.clicked.connect(self.activate_segmentation_mode)
 
     def mouseDoubleClickEvent(self, event):
         self.load_image()
@@ -86,8 +69,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 return
             self.original_cv_image = cv2.imread(self.image_path)
             self.grayscale_org_image = cv2.cvtColor(self.original_cv_image, cv2.COLOR_BGR2GRAY)
-            self.height, self.width = self.grayscale_org_image.shape[:2]
-            # self.original_cv_image = cv2.imread(self.image_path, cv2.IMREAD_GRAYSCALE)
             if self.original_cv_image is None:
                 print(f"Failed to load image with OpenCV: {self.image_path}")
                 self.original_cv_image = None
@@ -97,10 +78,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.Widget_Output_3.height(),
                 Qt.KeepAspectRatio
             )
+            self.Widget_Output_3.setAlignment(Qt.AlignCenter)
             self.Widget_Output_3.setPixmap(scaled_pixmap)
 
     def activate_thresholding_mode(self):
-        if self.RadioButton_Harris_2.isChecked():
+        if self.RadioButton_thres.isChecked():
             self.radioButton_optimal.setEnabled(True)
             self.radioButton_spectral.setEnabled(True)
             self.radioButton_otsu.setEnabled(True)
@@ -143,6 +125,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Widget_Output_1.height(),
             Qt.KeepAspectRatio
         )
+        self.Widget_Output_1.setAlignment(Qt.AlignCenter)
         self.Widget_Output_1.setPixmap(scaled_pixmap)
 
     def spectral_threshold(self):
@@ -171,7 +154,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 best_threshold = k
 
         binary_image = (self.grayscale_org_image > best_threshold).astype(np.uint8) * 255
-
         # ------------------------------------------------------------ #
         # Built-in function for testing #
         # _, binary_image = cv2.threshold(
@@ -188,10 +170,21 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.Widget_Output_1.height(),
                 Qt.KeepAspectRatio
             )
+            self.Widget_Output_1.setAlignment(Qt.AlignCenter)
             self.Widget_Output_1.setPixmap(scaled_pixmap)
         except Exception as e:
             print(e)
         return binary_image, best_threshold
+
+    def activate_segmentation_mode(self):
+        if self.RadioButton_seg.isChecked():
+            self.radioButton_optimal.setEnabled(False)
+            self.radioButton_spectral.setEnabled(False)
+            self.radioButton_otsu.setEnabled(False)
+        else:
+            self.radioButton_optimal.setEnabled(True)
+            self.radioButton_spectral.setEnabled(True)
+            self.radioButton_otsu.setEnabled(True)
 
 
 def main():

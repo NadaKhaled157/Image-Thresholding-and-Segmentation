@@ -53,7 +53,7 @@ background:#fdfdfd;
           <item>
            <layout class="QVBoxLayout" name="verticalLayout_9">
             <item>
-             <widget class="QRadioButton" name="RadioButton_Harris_2">
+             <widget class="QRadioButton" name="RadioButton_thres">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -247,7 +247,7 @@ border:None;</string>
              </spacer>
             </item>
             <item>
-             <widget class="QRadioButton" name="RadioButton_SIFT_2">
+             <widget class="QRadioButton" name="RadioButton_seg">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
