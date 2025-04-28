@@ -8,6 +8,27 @@ import cv2
 import numpy as np
 
 
+from PyQt5 import QtWidgets, uic
+
+from PyQt5.QtGui import *
+
+
+
+
+import matplotlib.pyplot as plt
+from io import BytesIO
+from PIL import Image
+from PyQt5.QtWidgets import QLabel, QRadioButton
+from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtWidgets import QMainWindow, QApplication, QButtonGroup, QPushButton, QSlider, QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QLabel
+from PyQt5.QtGui import QPixmap, QImage
+
+
+from Clustering import *
+
+
+
 def compute_histogram(image):
     histogram = np.zeros(256, dtype=int)
     height, width = image.shape
@@ -54,7 +75,40 @@ class MainWindow(QtWidgets.QMainWindow):
         self.radioButton_otsu.setEnabled(False)
 
         # SEGMENTATION #
-        self.RadioButton_seg.clicked.connect(self.activate_segmentation_mode)
+        # self.RadioButton_seg.clicked.connect(self.activate_segmentation_mode)
+
+        # //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+                # Create a button group and add the radio buttons
+        button_group = QButtonGroup(self)
+        button_group.addButton(self.radioButton_K_mean)
+        button_group.addButton(self.radioButton_MeanShift)
+        button_group.addButton(self.RadioButton_RegionGrowing)
+        button_group.addButton(self.RadioButton_Agglo)
+        
+        # Connect the buttons to a function to handle their state change
+        button_group.buttonClicked.connect(self.on_radio_button_clicked)
+
+
+
+        main_group=QButtonGroup(self)
+        main_group.addButton(self.RadioButton_thres)
+        main_group.addButton(self.RadioButton_seg)
+
+        main_group.buttonClicked.connect(self.on_radio_button_clicked)
+
+
+
+        self.Slider_N_iter_Kmean.sliderReleased.connect(self.on_radio_button_clicked)
+        self.Slider_N_clusters_Kmean.sliderReleased.connect(self.on_radio_button_clicked)
+        self.radioButton_Gray_Img.setAutoExclusive(False)
+        self.radioButton_Gray_Img.clicked.connect(self.on_radio_button_clicked)
+
+
+
+
+
 
     def mouseDoubleClickEvent(self, event):
         self.load_image()
@@ -176,15 +230,118 @@ class MainWindow(QtWidgets.QMainWindow):
             print(e)
         return binary_image, best_threshold
 
-    def activate_segmentation_mode(self):
-        if self.RadioButton_seg.isChecked():
-            self.radioButton_optimal.setEnabled(False)
-            self.radioButton_spectral.setEnabled(False)
-            self.radioButton_otsu.setEnabled(False)
-        else:
+    # def activate_segmentation_mode(self):
+    #     if self.RadioButton_seg.isChecked():
+    #         self.radioButton_optimal.setEnabled(False)
+    #         self.radioButton_spectral.setEnabled(False)
+    #         self.radioButton_otsu.setEnabled(False)
+    #     else:
+    #         self.radioButton_optimal.setEnabled(True)
+    #         self.radioButton_spectral.setEnabled(True)
+    #         self.radioButton_otsu.setEnabled(True)
+
+
+
+
+
+# ////////////////////////////////////////////////////////segmentation///////////////////////////////////////////////////////
+
+
+    def on_radio_button_clicked(self):
+        if self.RadioButton_thres.isChecked():
             self.radioButton_optimal.setEnabled(True)
             self.radioButton_spectral.setEnabled(True)
             self.radioButton_otsu.setEnabled(True)
+        else:
+            self.radioButton_optimal.setEnabled(False)
+            self.radioButton_spectral.setEnabled(False)
+            self.radioButton_otsu.setEnabled(False)
+            
+          
+            if self.radioButton_Gray_Img.isChecked():
+                
+                if self.radioButton_K_mean.isChecked():
+                    value_iterations=self.Slider_N_iter_Kmean.value()
+                    num_clusters=self.Slider_N_clusters_Kmean.value()
+                    self.Label_N_iter_Kmean.setText(f"          N_Iterations : {value_iterations}   ")
+                    self.Label_N_clusters_Kmean.setText(f"         Clusters :  {num_clusters}              ")
+
+
+                    output_image=kmeans_image_clustering(self.grayscale_org_image , k=num_clusters  ,max_iters=value_iterations)
+                    self.display_output_image(output_image)
+
+                
+                elif self.radioButton_MeanShift.isChecked():
+                    pass
+                elif self.RadioButton_RegionGrowing.isChecked():
+                    pass
+                elif self.RadioButton_Agglo.isChecked():
+                    pass
+            else:
+                if self.radioButton_K_mean.isChecked():
+                    
+                    value_iterations=self.Slider_N_iter_Kmean.value()
+                    num_clusters=self.Slider_N_clusters_Kmean.value()
+                    self.Label_N_iter_Kmean.setText(f"          N_Iterations : {value_iterations}   ")
+                    self.Label_N_clusters_Kmean.setText(f"         Clusters :  {num_clusters}              ")
+
+
+                    output_image=kmeans_image_clustering(self.original_cv_image , k=num_clusters  ,max_iters=value_iterations)
+                    output_image=cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
+                    self.display_output_image(output_image)
+
+
+                    
+                elif self.radioButton_MeanShift.isChecked():
+                    pass
+                elif self.RadioButton_RegionGrowing.isChecked():
+                    pass
+                elif self.RadioButton_Agglo.isChecked():
+                    pass
+
+    def display_output_image(self, output_img):
+        height, width = output_img.shape[:2]
+
+        if len(output_img.shape) == 2:
+            
+            bytes_per_line = width
+            q_img = QImage(output_img.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+        elif len(output_img.shape) == 3 and output_img.shape[2] == 3:
+            
+            bytes_per_line = 3 * width
+            q_img = QImage(output_img.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        else:
+            raise ValueError("Unsupported image format!")
+
+        pixmap = QPixmap.fromImage(q_img)
+        scaled_pixmap = pixmap.scaled(
+            472,
+            self.Widget_Output_1.height(),
+            Qt.KeepAspectRatio
+        )
+        self.Widget_Output_1.setPixmap(scaled_pixmap)
+
+
+
+
+
+
+
+
+
+
+
+
+    # def on_gray_button_clicked_radio(self): 
+    #     print(self.radioButton_Gray_Img.isChecked())      
+    #     if self.radioButton_Gray_Img.isChecked():
+    #         print("dllsd")
+    #         self.radioButton_Gray_Img.setChecked(False)
+    #         print( self.radioButton_Gray_Img.isChecked())
+
+        
+    #     self.on_radio_button_clicked()
+
 
 
 def main():

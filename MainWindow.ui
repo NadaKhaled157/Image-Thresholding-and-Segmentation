@@ -56,7 +56,7 @@ background:#fdfdfd;
              <widget class="QRadioButton" name="RadioButton_thres">
               <property name="font">
                <font>
-                <pointsize>-1</pointsize>
+                <pointsize>1</pointsize>
                 <weight>75</weight>
                 <bold>true</bold>
                </font>
@@ -250,7 +250,7 @@ border:None;</string>
              <widget class="QRadioButton" name="RadioButton_seg">
               <property name="font">
                <font>
-                <pointsize>-1</pointsize>
+                <pointsize>1</pointsize>
                 <weight>75</weight>
                 <bold>true</bold>
                </font>
@@ -275,6 +275,38 @@ border-right:None;
              </widget>
             </item>
             <item>
+             <spacer name="verticalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QRadioButton" name="radioButton_Gray_Img">
+                <property name="styleSheet">
+                 <string notr="true">Font-size:17px;
+font-weight:bold;
+background:#fdfdfd;
+color:#5583ad;
+
+border:None;</string>
+                </property>
+                <property name="text">
+                 <string>Gray_Image</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <spacer name="verticalSpacer_3">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -290,7 +322,7 @@ border-right:None;
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QRadioButton" name="radioButton_ssd_sift">
+               <widget class="QRadioButton" name="radioButton_K_mean">
                 <property name="styleSheet">
                  <string notr="true">Font-size:17px;
 font-weight:bold;
@@ -309,10 +341,10 @@ border:None;</string>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_41">
               <item>
-               <widget class="QLabel" name="label_param_23">
+               <widget class="QLabel" name="Label_N_iter_Kmean">
                 <property name="font">
                  <font>
-                  <pointsize>-1</pointsize>
+                  
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
@@ -326,12 +358,12 @@ color:#5583ad;
 border:None;</string>
                 </property>
                 <property name="text">
-                 <string>          N_Iterations    </string>
+                 <string>          N_Iterations : 50   </string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSlider" name="Slide_SIFT_Ratio_2">
+               <widget class="QSlider" name="Slider_N_iter_Kmean">
                 <property name="styleSheet">
                  <string notr="true">
 QSlider {
@@ -369,10 +401,10 @@ QSlider::add-page:horizontal {
 </string>
                 </property>
                 <property name="minimum">
-                 <number>1</number>
+                 <number>2</number>
                 </property>
                 <property name="maximum">
-                 <number>100</number>
+                 <number>500</number>
                 </property>
                 <property name="singleStep">
                  <number>1</number>
@@ -381,7 +413,7 @@ QSlider::add-page:horizontal {
                  <number>5</number>
                 </property>
                 <property name="value">
-                 <number>75</number>
+                 <number>50</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -396,10 +428,10 @@ QSlider::add-page:horizontal {
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_39">
               <item>
-               <widget class="QLabel" name="label_param_19">
+               <widget class="QLabel" name="Label_N_clusters_Kmean">
                 <property name="font">
                  <font>
-                  <pointsize>-1</pointsize>
+                  
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
@@ -413,12 +445,12 @@ color:#5583ad;
 border:None;</string>
                 </property>
                 <property name="text">
-                 <string>         Clusters             </string>
+                 <string>         Clusters :  4              </string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSlider" name="Slide_SIFT_Ratio">
+               <widget class="QSlider" name="Slider_N_clusters_Kmean">
                 <property name="styleSheet">
                  <string notr="true">
 QSlider {
@@ -459,7 +491,7 @@ QSlider::add-page:horizontal {
                  <number>1</number>
                 </property>
                 <property name="maximum">
-                 <number>100</number>
+                 <number>15</number>
                 </property>
                 <property name="singleStep">
                  <number>1</number>
@@ -468,7 +500,7 @@ QSlider::add-page:horizontal {
                  <number>5</number>
                 </property>
                 <property name="value">
-                 <number>75</number>
+                 <number>4</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -494,19 +526,23 @@ QSlider::add-page:horizontal {
              </spacer>
             </item>
             <item>
-             <widget class="QRadioButton" name="radioButton_ssd_sift_2">
-              <property name="styleSheet">
-               <string notr="true">Font-size:17px;
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QRadioButton" name="radioButton_MeanShift">
+                <property name="styleSheet">
+                 <string notr="true">Font-size:17px;
 font-weight:bold;
 background:#fdfdfd;
 color:#5583ad;
 
 border:None;</string>
-              </property>
-              <property name="text">
-               <string>Mean_Shift</string>
-              </property>
-             </widget>
+                </property>
+                <property name="text">
+                 <string>Mean_Shift</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_42">
@@ -514,7 +550,7 @@ border:None;</string>
                <widget class="QLabel" name="label_param_25">
                 <property name="font">
                  <font>
-                  <pointsize>-1</pointsize>
+                  
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
@@ -533,7 +569,7 @@ border:None;</string>
                </widget>
               </item>
               <item>
-               <widget class="QSlider" name="Slide_SIFT_Ratio_3">
+               <widget class="QSlider" name="Slide_N_iter_MeanShift">
                 <property name="styleSheet">
                  <string notr="true">
 QSlider {
@@ -611,10 +647,10 @@ QSlider::add-page:horizontal {
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_36">
               <item>
-               <widget class="QRadioButton" name="RadioButton_SSD_2">
+               <widget class="QRadioButton" name="RadioButton_RegionGrowing">
                 <property name="font">
                  <font>
-                  <pointsize>-1</pointsize>
+                  
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
@@ -643,7 +679,7 @@ border:None;</string>
                <widget class="QLabel" name="label_param_30">
                 <property name="font">
                  <font>
-                  <pointsize>-1</pointsize>
+                  
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
@@ -738,10 +774,10 @@ QSlider::add-page:horizontal {
              </spacer>
             </item>
             <item>
-             <widget class="QRadioButton" name="RadioButton_SSD_3">
+             <widget class="QRadioButton" name="RadioButton_Agglo">
               <property name="font">
                <font>
-                <pointsize>-1</pointsize>
+                
                 <weight>75</weight>
                 <bold>true</bold>
                </font>
@@ -768,7 +804,7 @@ border:None;</string>
                <widget class="QLabel" name="label_param_34">
                 <property name="font">
                  <font>
-                  <pointsize>-1</pointsize>
+                  
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
@@ -883,7 +919,7 @@ QSlider::add-page:horizontal {
           <widget class="QLabel" name="label_param_33">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -905,7 +941,7 @@ border:None;</string>
           <widget class="QLabel" name="Label_output_2">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
             </font>
            </property>
            <property name="styleSheet">
@@ -925,7 +961,7 @@ border:None;
           <widget class="QLabel" name="label_param_18">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -968,7 +1004,7 @@ border-radius:20px;</string>
           <widget class="QLabel" name="label_param_14">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -990,7 +1026,7 @@ border:None;</string>
           <widget class="QLabel" name="label_param_21">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1012,7 +1048,7 @@ border:None;</string>
           <widget class="QLabel" name="label_param_16">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1034,7 +1070,7 @@ border:None;</string>
           <widget class="QLabel" name="label_param_15">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1056,7 +1092,7 @@ border:None;</string>
           <widget class="QLabel" name="label_param_13">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1082,7 +1118,7 @@ border:None;</string>
           <widget class="QLabel" name="label_param_32">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1104,7 +1140,7 @@ border:None;</string>
           <widget class="QLabel" name="label_13">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
             </font>
            </property>
            <property name="styleSheet">
@@ -1124,7 +1160,7 @@ border:None;
           <widget class="QLabel" name="label_param_28">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1167,7 +1203,7 @@ border-radius:20px;</string>
           <widget class="QLabel" name="label_param_24">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1189,7 +1225,7 @@ border:None;</string>
           <widget class="QLabel" name="label_param_31">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1211,7 +1247,7 @@ border:None;</string>
           <widget class="QLabel" name="label_param_29">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1233,7 +1269,7 @@ border:None;</string>
           <widget class="QLabel" name="label_param_26">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
@@ -1255,7 +1291,7 @@ border:None;</string>
           <widget class="QLabel" name="label_param_22">
            <property name="font">
             <font>
-             <pointsize>-1</pointsize>
+             
              <weight>75</weight>
              <bold>true</bold>
             </font>
