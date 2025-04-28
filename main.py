@@ -321,6 +321,66 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self.Widget_Output_1.setPixmap(scaled_pixmap)
 
+        def spectral_threshold(self):
+            # Get the grayscale image
+            img = self.grayscale_org_image
+
+            # Compute histogram
+            histogram = compute_histogram(img)
+
+            # Find peaks and valleys in the histogram
+            peaks = []
+            valleys = []
+
+            # First and last points can't be peaks or valleys
+            for i in range(1, 255):
+                if histogram[i - 1] < histogram[i] and histogram[i] > histogram[i + 1]:
+                    peaks.append(i)
+                elif histogram[i - 1] > histogram[i] and histogram[i] < histogram[i + 1]:
+                    valleys.append(i)
+
+            # If we have at least one valley, use the deepest valley as threshold
+            if len(valleys) > 0:
+                # Find the valley between the two highest peaks
+                if len(peaks) >= 2:
+                    # Sort peaks by height (histogram value)
+                    sorted_peaks = sorted(peaks, key=lambda x: histogram[x], reverse=True)
+                    two_highest_peaks = sorted(sorted_peaks[:2])  # Take highest two and sort by position
+
+                    # Find valleys between the two highest peaks
+                    between_valleys = [v for v in valleys if two_highest_peaks[0] < v < two_highest_peaks[1]]
+
+                    if between_valleys:
+                        # Find the deepest valley
+                        best_threshold = min(between_valleys, key=lambda x: histogram[x])
+                    else:
+                        # If no valleys between peaks, use mean of two peaks
+                        best_threshold = (two_highest_peaks[0] + two_highest_peaks[1]) // 2
+                else:
+                    # If we have only one peak, find the lowest valley
+                    best_threshold = min(valleys, key=lambda x: histogram[x])
+            else:
+                # Fallback to mean if no clear bimodal distribution
+                best_threshold = int(np.mean(img))
+
+            # Apply threshold
+            binary_image = (img > best_threshold).astype(np.uint8) * 255
+
+            # Display the binary image
+            try:
+                pixmap = cv2_to_pixmap(binary_image)
+                scaled_pixmap = pixmap.scaled(
+                    self.Widget_Output_1.width(),
+                    self.Widget_Output_1.height(),
+                    Qt.KeepAspectRatio
+                )
+                self.Widget_Output_1.setAlignment(Qt.AlignCenter)
+                self.Widget_Output_1.setPixmap(scaled_pixmap)
+            except Exception as e:
+                print(f"Error displaying spectral threshold result: {e}")
+
+            return binary_image, best_threshold
+
 
 
 
