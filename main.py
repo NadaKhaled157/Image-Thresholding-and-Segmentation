@@ -61,6 +61,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Access widgets and connect signals/slots
         self.setup_connections()
+        self.radioButton_spectral.clicked.connect(self.spectral_threshold)
 
     def setup_connections(self):
         # THRESHOLDING #
@@ -182,8 +183,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.Widget_Output_1.setAlignment(Qt.AlignCenter)
         self.Widget_Output_1.setPixmap(scaled_pixmap)
 
-    def spectral_threshold(self):
-        pass
+ 
 
     def otsu_threshold(self):
         histogram = compute_histogram(self.grayscale_org_image)
@@ -321,7 +321,7 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self.Widget_Output_1.setPixmap(scaled_pixmap)
 
-        def spectral_threshold(self):
+    def spectral_threshold(self):
             # Get the grayscale image
             img = self.grayscale_org_image
 
