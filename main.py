@@ -61,16 +61,25 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Access widgets and connect signals/slots
         self.setup_connections()
-        self.radioButton_spectral.clicked.connect(self.spectral_threshold)
+        # self.radioButton_spectral.clicked.connect(self.spectral_threshold)
 
     def setup_connections(self):
         # THRESHOLDING #
         self.RadioButton_thres.clicked.connect(self.activate_thresholding_mode)
-        self.radioButton_optimal.clicked.connect(self.optimal_threshold)
-        self.radioButton_spectral.clicked.connect(self.spectral_threshold)
-        self.radioButton_otsu.clicked.connect(self.otsu_threshold)
+
+        self.radioButton_5.clicked.connect(self.set_thresholding_mode)  # local
+        self.radioButton_6.clicked.connect(self.set_thresholding_mode)  # global
+
+        # self.radioButton_optimal.clicked.connect(self.optimal_threshold)
+        # self.radioButton_spectral.clicked.connect(self.spectral_threshold)
+        # self.radioButton_otsu.clicked.connect(self.otsu_threshold)
+        self.radioButton_optimal.clicked.connect(self.apply_thresholding)
+        self.radioButton_spectral.clicked.connect(self.apply_thresholding)
+        self.radioButton_otsu.clicked.connect(self.apply_thresholding)
 
         # Initially disable thresholding buttons
+        self.radioButton_5.setEnabled(False)
+        self.radioButton_6.setEnabled(False)
         self.radioButton_optimal.setEnabled(False)
         self.radioButton_spectral.setEnabled(False)
         self.radioButton_otsu.setEnabled(False)
@@ -99,17 +108,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         main_group.buttonClicked.connect(self.on_radio_button_clicked)
 
+        thres_btn_grp = QButtonGroup(self)
+        thres_btn_grp.addButton(self.radioButton_5)
+        thres_btn_grp.addButton(self.radioButton_6)
 
+        thres_type_btn_grp = QButtonGroup(self)
+        thres_type_btn_grp.addButton(self.radioButton_optimal)
+        thres_type_btn_grp.addButton(self.radioButton_spectral)
+        thres_type_btn_grp.addButton(self.radioButton_otsu)
 
         self.Slider_N_iter_Kmean.sliderReleased.connect(self.on_radio_button_clicked)
         self.Slider_N_clusters_Kmean.sliderReleased.connect(self.on_radio_button_clicked)
         self.radioButton_Gray_Img.setAutoExclusive(False)
         self.radioButton_Gray_Img.clicked.connect(self.on_radio_button_clicked)
-
-
-
-
-
 
     def mouseDoubleClickEvent(self, event):
         self.load_image()
@@ -137,6 +148,23 @@ class MainWindow(QtWidgets.QMainWindow):
             self.Widget_Output_3.setPixmap(scaled_pixmap)
 
     def activate_thresholding_mode(self):
+        sender = self.sender()
+        if sender.isChecked():
+            self.radioButton_5.setEnabled(True)
+            self.radioButton_6.setEnabled(True)
+            # self.radioButton_optimal.setEnabled(True)
+            # self.radioButton_spectral.setEnabled(True)
+            # self.radioButton_otsu.setEnabled(True)
+        else:
+            self.radioButton_5.setEnabled(False)
+            self.radioButton_6.setEnabled(False)
+            # self.radioButton_optimal.setEnabled(False)
+            # self.radioButton_spectral.setEnabled(False)
+            # self.radioButton_otsu.setEnabled(False)
+
+    def set_thresholding_mode(self):
+        self.mode = self.sender().text().replace(" ", "")
+        print(f"Thresholding Mode: {self.mode}")
         if self.RadioButton_thres.isChecked():
             self.radioButton_optimal.setEnabled(True)
             self.radioButton_spectral.setEnabled(True)
@@ -145,12 +173,59 @@ class MainWindow(QtWidgets.QMainWindow):
             self.radioButton_optimal.setEnabled(False)
             self.radioButton_spectral.setEnabled(False)
             self.radioButton_otsu.setEnabled(False)
-        # Example: Handle radio button clicks
-        sender = self.sender()
-        print(f"Radio button clicked: {sender.text()}")
+        # print(f"Radio button clicked: {sender.text()}")
 
-    def optimal_threshold(self, max_iterations=200):
-        img = self.grayscale_org_image
+    def apply_thresholding(self):
+        sender = self.sender().text().replace(" ", "")
+        if self.mode == "Local":
+            print("Local")
+            # Divide image into 4 quadrants
+            height, width = self.grayscale_org_image.shape
+            h_half, w_half = height // 2, width // 2
+            quadrants = [
+                self.grayscale_org_image[:h_half, :w_half],      # Top-left
+                self.grayscale_org_image[:h_half, w_half:],      # Top-right
+                self.grayscale_org_image[h_half:, :w_half],      # Bottom-left
+                self.grayscale_org_image[h_half:, w_half:]       # Bottom-right
+            ]
+            # print(f"Quadrants: {quadrants}")
+            # for i, quad in enumerate(quadrants):
+            #     cv2.imwrite(f"quadrant_{i}.jpg", quad)
+            # Apply thresholding to each quadrant
+            binary_quadrants = []
+            for i, quad in enumerate(quadrants):
+                print("Inside quadrants loop")
+                if sender == "Optimal":
+                    print("Local Optimal")
+                    binary_quad = self.optimal_threshold(quad, max_iterations=200)
+                elif sender == "Spectral":
+                    print("Local Spectral")
+                    binary_quad = self.spectral_threshold(quad)
+                elif sender == "OTSU":
+                    print("Local OTSU")
+                    binary_quad = self.otsu_threshold(quad)
+                binary_quadrants.append(binary_quad)
+                # cv2.imwrite(f"binary_quadrant_{i}.jpg", binary_quad * 255)
+            # Merge quadrants
+            top_row = np.hstack((binary_quadrants[0], binary_quadrants[1]))
+            bottom_row = np.hstack((binary_quadrants[2], binary_quadrants[3]))
+            binary_image = np.vstack((top_row, bottom_row))
+            # Ensure merged image matches original dimensions (not really necessary)
+            if binary_image.shape != (height, width):
+                binary_image = cv2.resize(binary_image, (width, height), interpolation=cv2.INTER_NEAREST)
+            # cv2.imwrite(f"local.jpg", binary_image * 255)
+            self.display_results(binary_image)
+        elif self.mode == "Global":
+            print("Global")
+            if sender == "Optimal":
+                self.optimal_threshold(self.grayscale_org_image)
+            elif sender == "Spectral":
+                self.spectral_threshold(self.grayscale_org_image)
+            elif sender == "OTSU":
+                self.otsu_threshold(self.grayscale_org_image)
+
+    def optimal_threshold(self, img, max_iterations=200):
+        # img = self.grayscale_org_image
         # Initialization
         top_left = img[0, 0]
         top_right = img[0, -1]
@@ -174,20 +249,81 @@ class MainWindow(QtWidgets.QMainWindow):
             iteration += 1
 
         binary_image = np.where(img > new_threshold, 1, 0).astype(np.uint8)  # 0 bg & 1 fg
-        pixmap = cv2_to_pixmap(binary_image * 255)
-        scaled_pixmap = pixmap.scaled(
-            self.Widget_Output_1.width(),
-            self.Widget_Output_1.height(),
-            Qt.KeepAspectRatio
-        )
-        self.Widget_Output_1.setAlignment(Qt.AlignCenter)
-        self.Widget_Output_1.setPixmap(scaled_pixmap)
+        self.display_results(binary_image)
+        return binary_image
+        # pixmap = cv2_to_pixmap(binary_image * 255)
+        # scaled_pixmap = pixmap.scaled(
+        #     self.Widget_Output_1.width(),
+        #     self.Widget_Output_1.height(),
+        #     Qt.KeepAspectRatio
+        # )
+        # self.Widget_Output_1.setAlignment(Qt.AlignCenter)
+        # self.Widget_Output_1.setPixmap(scaled_pixmap)
 
- 
+    def spectral_threshold(self, img):
+        print("Spectral")
+        # Get the grayscale image
+        # img = self.grayscale_org_image
+        # Compute histogram
+        histogram = compute_histogram(img)
+        # Find peaks and valleys in the histogram
+        peaks = []
+        valleys = []
+        # First and last points can't be peaks or valleys
+        for i in range(1, 255):
+            if histogram[i - 1] < histogram[i] and histogram[i] > histogram[i + 1]:
+                peaks.append(i)
+            elif histogram[i - 1] > histogram[i] and histogram[i] < histogram[i + 1]:
+                valleys.append(i)
 
-    def otsu_threshold(self):
-        histogram = compute_histogram(self.grayscale_org_image)
-        probabilities = histogram/self.grayscale_org_image.size  # normalize histogram
+        # If we have at least one valley, use the deepest valley as threshold
+        if len(valleys) > 0:
+            # Find the valley between the two highest peaks
+            if len(peaks) >= 2:
+                # Sort peaks by height (histogram value)
+                sorted_peaks = sorted(peaks, key=lambda x: histogram[x], reverse=True)
+                two_highest_peaks = sorted(sorted_peaks[:2])  # Take highest two and sort by position
+
+                # Find valleys between the two highest peaks
+                between_valleys = [v for v in valleys if two_highest_peaks[0] < v < two_highest_peaks[1]]
+
+                if between_valleys:
+                    # Find the deepest valley
+                    best_threshold = min(between_valleys, key=lambda x: histogram[x])
+                else:
+                    # If no valleys between peaks, use mean of two peaks
+                    best_threshold = (two_highest_peaks[0] + two_highest_peaks[1]) // 2
+            else:
+                # If we have only one peak, find the lowest valley
+                best_threshold = min(valleys, key=lambda x: histogram[x])
+        else:
+            # Fallback to mean if no clear bimodal distribution
+            best_threshold = int(np.mean(img))
+
+        # Apply threshold
+        binary_image = (img > best_threshold).astype(np.uint8)
+
+        # Display the binary image
+        self.display_results(binary_image)
+        # try:
+        #     pixmap = cv2_to_pixmap(binary_image)
+        #     scaled_pixmap = pixmap.scaled(
+        #         self.Widget_Output_1.width(),
+        #         self.Widget_Output_1.height(),
+        #         Qt.KeepAspectRatio
+        #     )
+        #     self.Widget_Output_1.setAlignment(Qt.AlignCenter)
+        #     self.Widget_Output_1.setPixmap(scaled_pixmap)
+        # except Exception as e:
+        #     print(f"Error displaying spectral threshold result: {e}")
+
+        return binary_image
+
+    def otsu_threshold(self, img):
+        print("OTSU FUNC")
+        # img = self.grayscale_org_image
+        histogram = compute_histogram(img)
+        probabilities = histogram / img.size  # normalize histogram
         best_threshold = 0
         max_variance = 0
 
@@ -207,7 +343,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 max_variance = variance
                 best_threshold = k
 
-        binary_image = (self.grayscale_org_image > best_threshold).astype(np.uint8) * 255
+        binary_image = (img > best_threshold).astype(np.uint8)
+        self.display_results(binary_image)
         # ------------------------------------------------------------ #
         # Built-in function for testing #
         # _, binary_image = cv2.threshold(
@@ -217,18 +354,18 @@ class MainWindow(QtWidgets.QMainWindow):
         #     cv2.THRESH_BINARY + cv2.THRESH_OTSU  # Otsu's method
         # )
         # ------------------------------------------------------------ #
-        try:
-            pixmap = cv2_to_pixmap(binary_image)
-            scaled_pixmap = pixmap.scaled(
-                self.Widget_Output_1.width(),
-                self.Widget_Output_1.height(),
-                Qt.KeepAspectRatio
-            )
-            self.Widget_Output_1.setAlignment(Qt.AlignCenter)
-            self.Widget_Output_1.setPixmap(scaled_pixmap)
-        except Exception as e:
-            print(e)
-        return binary_image, best_threshold
+        # try:
+        #     pixmap = cv2_to_pixmap(binary_image)
+        #     scaled_pixmap = pixmap.scaled(
+        #         self.Widget_Output_1.width(),
+        #         self.Widget_Output_1.height(),
+        #         Qt.KeepAspectRatio
+        #     )
+        #     self.Widget_Output_1.setAlignment(Qt.AlignCenter)
+        #     self.Widget_Output_1.setPixmap(scaled_pixmap)
+        # except Exception as e:
+        #     print(e)
+        return binary_image
 
     # def activate_segmentation_mode(self):
     #     if self.RadioButton_seg.isChecked():
@@ -241,23 +378,19 @@ class MainWindow(QtWidgets.QMainWindow):
     #         self.radioButton_otsu.setEnabled(True)
 
 
-
-
-
 # ////////////////////////////////////////////////////////segmentation///////////////////////////////////////////////////////
 
-
     def on_radio_button_clicked(self):
-        if self.RadioButton_thres.isChecked():
-            self.radioButton_optimal.setEnabled(True)
-            self.radioButton_spectral.setEnabled(True)
-            self.radioButton_otsu.setEnabled(True)
+        buttons = [self.radioButton_5, self.radioButton_6,
+                   self.radioButton_optimal, self.radioButton_spectral, self.radioButton_otsu]
+        if self.RadioButton_seg.isChecked():
+            for btn in buttons:
+                btn.setEnabled(False)
+                # btn.setChecked(True)
         else:
-            self.radioButton_optimal.setEnabled(False)
-            self.radioButton_spectral.setEnabled(False)
-            self.radioButton_otsu.setEnabled(False)
-            
-          
+            for btn in buttons:
+                btn.setEnabled(True)
+
             if self.radioButton_Gray_Img.isChecked():
                 
                 if self.radioButton_K_mean.isChecked():
@@ -269,8 +402,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     output_image=kmeans_image_clustering(self.grayscale_org_image , k=num_clusters  ,max_iters=value_iterations)
                     self.display_output_image(output_image)
-
-                
                 elif self.radioButton_MeanShift.isChecked():
                     pass
                 elif self.RadioButton_RegionGrowing.isChecked():
@@ -284,13 +415,9 @@ class MainWindow(QtWidgets.QMainWindow):
                     num_clusters=self.Slider_N_clusters_Kmean.value()
                     self.Label_N_iter_Kmean.setText(f"          N_Iterations : {value_iterations}   ")
                     self.Label_N_clusters_Kmean.setText(f"         Clusters :  {num_clusters}              ")
-
-
                     output_image=kmeans_image_clustering(self.original_cv_image , k=num_clusters  ,max_iters=value_iterations)
                     output_image=cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
                     self.display_output_image(output_image)
-
-
                     
                 elif self.radioButton_MeanShift.isChecked():
                     pass
@@ -301,18 +428,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def display_output_image(self, output_img):
         height, width = output_img.shape[:2]
-
         if len(output_img.shape) == 2:
-            
             bytes_per_line = width
             q_img = QImage(output_img.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
         elif len(output_img.shape) == 3 and output_img.shape[2] == 3:
-            
             bytes_per_line = 3 * width
             q_img = QImage(output_img.data, width, height, bytes_per_line, QImage.Format_RGB888)
         else:
             raise ValueError("Unsupported image format!")
-
         pixmap = QPixmap.fromImage(q_img)
         scaled_pixmap = pixmap.scaled(
             472,
@@ -321,65 +444,15 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self.Widget_Output_1.setPixmap(scaled_pixmap)
 
-    def spectral_threshold(self):
-            # Get the grayscale image
-            img = self.grayscale_org_image
-
-            # Compute histogram
-            histogram = compute_histogram(img)
-
-            # Find peaks and valleys in the histogram
-            peaks = []
-            valleys = []
-
-            # First and last points can't be peaks or valleys
-            for i in range(1, 255):
-                if histogram[i - 1] < histogram[i] and histogram[i] > histogram[i + 1]:
-                    peaks.append(i)
-                elif histogram[i - 1] > histogram[i] and histogram[i] < histogram[i + 1]:
-                    valleys.append(i)
-
-            # If we have at least one valley, use the deepest valley as threshold
-            if len(valleys) > 0:
-                # Find the valley between the two highest peaks
-                if len(peaks) >= 2:
-                    # Sort peaks by height (histogram value)
-                    sorted_peaks = sorted(peaks, key=lambda x: histogram[x], reverse=True)
-                    two_highest_peaks = sorted(sorted_peaks[:2])  # Take highest two and sort by position
-
-                    # Find valleys between the two highest peaks
-                    between_valleys = [v for v in valleys if two_highest_peaks[0] < v < two_highest_peaks[1]]
-
-                    if between_valleys:
-                        # Find the deepest valley
-                        best_threshold = min(between_valleys, key=lambda x: histogram[x])
-                    else:
-                        # If no valleys between peaks, use mean of two peaks
-                        best_threshold = (two_highest_peaks[0] + two_highest_peaks[1]) // 2
-                else:
-                    # If we have only one peak, find the lowest valley
-                    best_threshold = min(valleys, key=lambda x: histogram[x])
-            else:
-                # Fallback to mean if no clear bimodal distribution
-                best_threshold = int(np.mean(img))
-
-            # Apply threshold
-            binary_image = (img > best_threshold).astype(np.uint8) * 255
-
-            # Display the binary image
-            try:
-                pixmap = cv2_to_pixmap(binary_image)
-                scaled_pixmap = pixmap.scaled(
-                    self.Widget_Output_1.width(),
-                    self.Widget_Output_1.height(),
-                    Qt.KeepAspectRatio
-                )
-                self.Widget_Output_1.setAlignment(Qt.AlignCenter)
-                self.Widget_Output_1.setPixmap(scaled_pixmap)
-            except Exception as e:
-                print(f"Error displaying spectral threshold result: {e}")
-
-            return binary_image, best_threshold
+    def display_results(self, binary_image):
+        pixmap = cv2_to_pixmap(binary_image * 255)
+        scaled_pixmap = pixmap.scaled(
+            self.Widget_Output_1.width(),
+            self.Widget_Output_1.height(),
+            Qt.KeepAspectRatio
+        )
+        self.Widget_Output_1.setAlignment(Qt.AlignCenter)
+        self.Widget_Output_1.setPixmap(scaled_pixmap)
 
 
 
