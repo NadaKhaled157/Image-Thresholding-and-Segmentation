@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1471</width>
-    <height>902</height>
+    <height>924</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -56,7 +56,7 @@ background:#fdfdfd;
              <widget class="QRadioButton" name="RadioButton_thres">
               <property name="font">
                <font>
-                <pointsize>1</pointsize>
+                
                 <weight>75</weight>
                 <bold>true</bold>
                </font>
@@ -209,7 +209,7 @@ color:#5583ad;
 border:None;</string>
                 </property>
                 <property name="text">
-                 <string>OTSU</string>
+                 <string>OSTU</string>
                 </property>
                </widget>
               </item>
@@ -674,6 +674,149 @@ border:None;</string>
              </layout>
             </item>
             <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QLabel" name="label_param_35">
+                <property name="font">
+                 <font>
+                  
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">Font-size:17px;
+font-weight:bold;
+background:#fdfdfd;
+color:#5583ad;
+
+border:None;</string>
+                </property>
+                <property name="text">
+                 <string>X</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="X_corr">
+                <property name="font">
+                 <font>
+                  
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">Font-size:15px;
+font-weight:bold;
+background: #ccd8e8;
+color:white;
+border:3px solid black;
+padding:2px;
+border-radius:7px;
+ border: 3px solid#5583ad;;</string>
+                </property>
+                <property name="maximum">
+                 <number>1000</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_param_36">
+                <property name="font">
+                 <font>
+                  
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">Font-size:17px;
+font-weight:bold;
+background:#fdfdfd;
+color:#5583ad;
+
+border:None;</string>
+                </property>
+                <property name="text">
+                 <string>Y</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="Y_corr">
+                <property name="font">
+                 <font>
+                  
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">Font-size:15px;
+font-weight:bold;
+background: #ccd8e8;
+color:white;
+border:3px solid black;
+padding:2px;
+border-radius:7px;
+ border: 3px solid#5583ad;;</string>
+                </property>
+                <property name="maximum">
+                 <number>1000</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <spacer name="horizontalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_selectpoint">
+                <property name="styleSheet">
+                 <string notr="true">Font-size:15px;
+font-weight:bold;
+background: #ccd8e8;
+color:white;
+border:3px solid black;
+padding:2px;
+border-radius:7px;
+ border: 3px solid#5583ad;;</string>
+                </property>
+                <property name="text">
+                 <string>           select point               </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_44">
               <item>
                <widget class="QLabel" name="label_param_30">
@@ -693,12 +836,12 @@ color:#5583ad;
 border:None;</string>
                 </property>
                 <property name="text">
-                 <string>          Threshold       </string>
+                 <string>          Threshold : 5      </string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSlider" name="Slide_SIFT_Ratio_5">
+               <widget class="QSlider" name="slider_threshold_region">
                 <property name="styleSheet">
                  <string notr="true">
 QSlider {
@@ -748,7 +891,7 @@ QSlider::add-page:horizontal {
                  <number>5</number>
                 </property>
                 <property name="value">
-                 <number>75</number>
+                 <number>5</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -818,12 +961,12 @@ color:#5583ad;
 border:None;</string>
                 </property>
                 <property name="text">
-                 <string>          Clusters    </string>
+                 <string>          Clusters : 4    </string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QSlider" name="Slide_SIFT_Ratio_6">
+               <widget class="QSlider" name="Slider_Agglo_Num_Clusters">
                 <property name="styleSheet">
                  <string notr="true">
 QSlider {
@@ -864,7 +1007,7 @@ QSlider::add-page:horizontal {
                  <number>1</number>
                 </property>
                 <property name="maximum">
-                 <number>100</number>
+                 <number>20</number>
                 </property>
                 <property name="singleStep">
                  <number>1</number>
@@ -873,7 +1016,7 @@ QSlider::add-page:horizontal {
                  <number>5</number>
                 </property>
                 <property name="value">
-                 <number>75</number>
+                 <number>4</number>
                 </property>
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
