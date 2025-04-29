@@ -23,34 +23,34 @@ def kmeans_image_clustering(image, k=3, max_iters=10):
 
     # 1. Prepare the data
     if is_rgb:
-        # For RGB images: each pixel has 3 values (R, G, B)
+       
         data = image.reshape(-1, 3).astype(np.float32)
     else:
-        # For grayscale images: each pixel has 1 value
+        
         data = image.reshape(-1, 1).astype(np.float32)
     
-    # 2. Randomly initialize centroids
+    # Randomly initialize centroids
     np.random.seed(0)
     centroids = data[np.random.choice(data.shape[0], k, replace=False)]
 
-    # 3. Iteratively update centroids
+    #  Iteratively update centroids
     for iteration in range(max_iters):
-        # 3.1 Compute distances between each pixel and each centroid
+        #  Compute distances between each pixel and each centroid
         distances = np.linalg.norm(data[:, np.newaxis] - centroids, axis=2)
         
-        # 3.2 Assign each pixel to the nearest centroid
+        # Assign each pixel to the nearest centroid
         labels = np.argmin(distances, axis=1)
         
-        # 3.3 Calculate new centroids
+        # Calculate new centroids
         new_centroids = np.array([data[labels == i].mean(axis=0) for i in range(k)])
         
-        # 3.4 Update centroids
+        #  Update centroids
         centroids = new_centroids
 
-    # 4. Create the clustered image
+    #  Create the clustered image
     clustered_data = centroids[labels].reshape(image.shape)
 
-    # 5. Convert to appropriate type
+    #  Convert to appropriate type
     clustered_image = np.clip(clustered_data, 0, 255).astype(np.uint8)
 
     return clustered_image
@@ -141,12 +141,6 @@ def initial_clusters(image_clusters, k):
     # Remove empty clusters if any
     return [group for group in groups if group]
 
-def get_cluster_center(cluster):
-    """
-    Returns the center of the cluster.
-    """
-    # Calculate the mean of all points in the cluster
-    return np.mean(cluster, axis=0)
 
 def get_clusters(image_clusters, clusters_number):
     """
@@ -157,8 +151,7 @@ def get_clusters(image_clusters, clusters_number):
     cluster_assignments = {tuple(point): i for i, cluster in enumerate(
         clusters_list) for point in cluster}
     # Calculate initial cluster centers
-    centers = [get_cluster_center(cluster)
-                for cluster in clusters_list]
+    centers = [np.mean(cluster, axis=0)  for cluster in clusters_list]
 
     # Merge clusters until the desired number is reached
     while len(clusters_list) > clusters_number:
@@ -168,8 +161,7 @@ def get_clusters(image_clusters, clusters_number):
         # Find the two clusters with the minimum distance
         for i, cluster1 in enumerate(clusters_list):
             for j, cluster2 in enumerate(clusters_list[:i]):
-                distance = get_euclidean_distance(
-                    centers[i], centers[j])
+                distance = np.linalg.norm(centers[i] - centers[j])
                 if distance < min_distance:
                     min_distance = distance
                     merge_indices = (i, j)
@@ -179,7 +171,7 @@ def get_clusters(image_clusters, clusters_number):
         clusters_list[i] += clusters_list[j]
         del clusters_list[j]
         # Update cluster centers
-        centers[i] = get_cluster_center(clusters_list[i])
+        centers[i] = np.mean(clusters_list[i], axis=0)
         del centers[j]
 
         # Update cluster assignments
@@ -188,10 +180,6 @@ def get_clusters(image_clusters, clusters_number):
 
     return cluster_assignments, centers
 
-
-
-def get_euclidean_distance( pixel, centroid):
-        return np.linalg.norm(pixel - centroid)
 
 def apply_agglomerative_clustering(image, clusters_number):
     """

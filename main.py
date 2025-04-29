@@ -6,7 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 import cv2
 import numpy as np
-
+from shift import MeanShiftSegmentation
 
 from PyQt5 import QtWidgets, uic
 
@@ -129,6 +129,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.pushButton_selectpoint.clicked.connect(self.on_radio_button_clicked)
         self.slider_threshold_region.sliderReleased.connect(self.on_radio_button_clicked)
         self.Slider_Agglo_Num_Clusters.sliderReleased.connect(self.on_radio_button_clicked)
+
+        self.Slider_color_Threshold.sliderReleased.connect(self.on_radio_button_clicked)
+        self.Slider_spatial_threshold.sliderReleased.connect(self.on_radio_button_clicked)
+        self.Slider_max_iterations.sliderReleased.connect(self.on_radio_button_clicked)
 
 
 
@@ -477,7 +481,29 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.display_output_image(output_image)
                     
                 elif self.radioButton_MeanShift.isChecked():
-                    pass
+                        
+
+                        color_threshold=self.Slider_color_Threshold.value()
+                        self.Label_color.setText(f"        color_threshold :  {color_threshold}         ")
+                        spatial_threshold=self.Slider_spatial_threshold.value()
+                        self.Label_spatial.setText(f"         spatial_threshold :  {spatial_threshold}    ")
+                        max_iterations=self.Slider_max_iterations.value()
+                        self.Label_max_iterations.setText(f"         max_iterations :  {max_iterations}    ")
+
+
+
+
+
+                        segmenter = MeanShiftSegmentation(self.original_cv_image)
+                        output_image = segmenter.segment_image(
+                            color_threshold=color_threshold, 
+                            spatial_threshold=spatial_threshold,
+                            max_iterations=max_iterations
+                        )
+                        output_image=cv2.cvtColor(output_image, cv2.COLOR_BGR2RGB)
+                        self.display_output_image(output_image)
+   
+
                 elif self.RadioButton_RegionGrowing.isChecked():
                     self.set_spin_max(self.original_cv_image)
 
