@@ -209,7 +209,7 @@ color:#5583ad;
 border:None;</string>
                 </property>
                 <property name="text">
-                 <string>OSTU</string>
+                 <string>OTSU</string>
                 </property>
                </widget>
               </item>

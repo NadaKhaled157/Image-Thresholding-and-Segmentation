@@ -21,7 +21,7 @@ def kmeans_image_clustering(image, k=3, max_iters=10):
 
 
 
-    # 1. Prepare the data
+    # 1. Prepare the data 
     if is_rgb:
        
         data = image.reshape(-1, 3).astype(np.float32)
@@ -29,7 +29,7 @@ def kmeans_image_clustering(image, k=3, max_iters=10):
         
         data = image.reshape(-1, 1).astype(np.float32)
     
-    # Randomly initialize centroids
+    # Randomly initialize centroids 
     np.random.seed(0)
     centroids = data[np.random.choice(data.shape[0], k, replace=False)]
 
@@ -47,7 +47,7 @@ def kmeans_image_clustering(image, k=3, max_iters=10):
         #  Update centroids
         centroids = new_centroids
 
-    #  Create the clustered image
+    #  Create the clustered image >> set each pixel value respect to its cluster
     clustered_data = centroids[labels].reshape(image.shape)
 
     #  Convert to appropriate type
@@ -97,6 +97,7 @@ def region_growing(img, seed_point, threshold=20):
                     if is_color:
                         neighbor_value = img[ny, nx, :].astype(np.float32)
                         error = np.linalg.norm(neighbor_value - seed_value)
+                    # gray image
                     else:
                         neighbor_value = float(img[ny, nx])
                         error = abs(neighbor_value - seed_value)
@@ -104,6 +105,7 @@ def region_growing(img, seed_point, threshold=20):
                     if error <= threshold:
                         queue.append((nx, ny))
                         visited[ny, nx] = True
+
                         if is_color:
                             seed_value = (seed_value * count + neighbor_value) / (count + 1)
                         else:
@@ -130,11 +132,10 @@ def initial_clusters(image_clusters, k):
 
     # Assign each pixel to its closest cluster based on color
     for p in image_clusters:
-        # Calculate the mean color of the pixel
+        # Calculate the mean color of the pixel if 3 channels , or gray return as it is
         color = int(np.mean(p))
-        # Determine the index of the closest cluster
-        group_index = min(range(k), key=lambda i: abs(
-            color - i * cluster_color))
+        # Determine the index of the closest cluster 
+        group_index = min(range(k), key=lambda i: abs(color - i * cluster_color))
         # Add the pixel to the corresponding cluster
         groups[group_index].append(p)
 
@@ -148,9 +149,10 @@ def get_clusters(image_clusters, clusters_number):
     """
     # Initialize clusters and their assignments
     clusters_list = initial_clusters(image_clusters, clusters_number)
-    cluster_assignments = {tuple(point): i for i, cluster in enumerate(
-        clusters_list) for point in cluster}
-    # Calculate initial cluster centers
+    # Create a dictionary to store the cluster assignments 
+    cluster_assignments = {tuple(point): i for i, cluster in enumerate( clusters_list ) for point in cluster}
+   
+   # Calculate initial cluster centers
     centers = [np.mean(cluster, axis=0)  for cluster in clusters_list]
 
     # Merge clusters until the desired number is reached
